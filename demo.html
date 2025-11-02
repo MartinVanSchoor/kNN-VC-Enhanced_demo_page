@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>kNN-VC-Enhanced</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <style>
+
+        body {
+            font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.5;
+            color:#333;
+            background-color:#fff;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 1.2;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 40px;  /* 42px */
+            font-weight: 300;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        h2, h3 {
+            font-size: 25px;
+            font-weight: 400;
+        }
+
+/*      
+        @media handheld, only screen and (max-width:480px) {
+            body { padding: 0; }
+        }
+*/
+
+        table {
+            display: block;
+            width: 100%;
+            border-collapse: collapse;
+            overflow: auto;
+            text-align: center;
+        }
+
+        a{
+            color: #2a7ae2;
+            text-decoration: none;
+        }
+        a:visited{
+            color: #1756a9;
+        }
+        a:hover{
+            color: #333;
+            text-decoration: underline;
+        }
+
+        .audio_smaller {
+            max-width: 210px;  /* 195px */
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:300,400,700,italic" rel="stylesheet">
+</head>
+
+<body>
+    <h1>kNN-VC-Enhanced - Training-free, any-to-any one-shot voice conversion</h1>
+
+    <p style="text-align: center">
+        Marthinus Enslin Van Schoor
+    </p>
+    <p style="text-align: center">
+        [<a href="https://github.com/MartinVanSchoor/Skripsie2025" target="_blank" rel="external noopener noreferrer">code</a>]
+    </p>
+
+    <p>
+        We introduce kNN-VC-Enhanced, an improvement of the kNN-VC model, which features improved performance for low target data scenarios such as one-shot voice conversion, and provides a means for efficient, training-free conversion which works for low resource (limited computing power) scenarios. This work provides a model which is robust and practical for a wide variety of applications, as conversions can be made using only a single, short utterance from the target speaker. The goal of this demo pages is to provide the reader of the report with real examples to consult as they read relevant sections of the report, to gain a better understanding of choices made and how the results actually sound, rather than just looking at graphs and tables.
+    </p>
+
+    <h2>Section 5.1 - kNN-VC's weaknesses</h2>
+
+    <table>
+        <tbody>        
+        <tr>
+            <td>Source</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/source_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/source_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/source_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/source_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>Target</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/target_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/target_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/target_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/target_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>3 mins target audio</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/180_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/180_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/180_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/180_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>1.5 min target audio</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/90_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/90_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/90_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/90_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>45 sec target audio</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/45_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/45_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/45_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/45_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>20 sec target audio</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/20_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/20_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/20_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/20_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>10 sec target audio</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/10_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/10_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/10_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/10_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>5 sec target audio</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/5_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/5_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/5_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/5_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>3 sec target audio</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/3_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/3_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/3_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.1/3_4.wav"></audio>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Section 5.2 - Sampling: improving the intelligibility</h2>
+    <table>
+        <tbody>        
+        <tr>
+            <td>Source</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/source_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/source_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/source_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/source_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>Target</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/target_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/target_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/target_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/target_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>kNN-VC</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/vanilla_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/vanilla_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/vanilla_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/vanilla_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>kNN-VC with sampling</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/sampling_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/sampling_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/sampling_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.2/sampling_4.wav"></audio>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Section 5.3 - Mapping/Transformation: improving the speaker similarity</h2>
+    <table>
+        <tbody>        
+        <tr>
+            <td>Source</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/source_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/source_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/source_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/source_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>Target</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/target_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/target_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/target_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/target_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>kNN-VC</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/vanilla_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/vanilla_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/vanilla_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/vanilla_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>kNN-VC with sampling</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/sampling_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/sampling_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/sampling_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/sampling_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>kNN-VC-Enhanced</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/kNN-VC-E_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/kNN-VC-E_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/kNN-VC-E_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.3/kNN-VC-E_4.wav"></audio>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Section 5.4 - Final model results and comparison</h2>
+    <table>
+        <tbody>        
+        <tr>
+            <td>Source</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/source_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/source_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/source_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/source_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>Target</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/target_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/target_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/target_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/target_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>kNN-VC</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/kNN-VC_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/kNN-VC_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/kNN-VC_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/kNN-VC_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>kNN-VC-Enhanced</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/kNN-VC-E_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/kNN-VC-E_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/kNN-VC-E_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/kNN-VC-E_4.wav"></audio>
+            </td>
+        </tr>
+        <tr>
+            <td>MKL-VC</td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/MKL-VC_1.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/MKL-VC_2.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/MKL-VC_3.wav"></audio>
+            </td>
+            <td>
+                <audio class="audio_smaller" controls controlsList="nodownload noplaybackrate" preload="metadata" src="wav/5.4/MKL-VC_4.wav"></audio>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br>
+
+</body>
+
+</html>
